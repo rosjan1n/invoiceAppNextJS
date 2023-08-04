@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+enum StatusType {
+  PAID
+  PENDING
+  NOT_PAID
+}
+
+enum PaymentType {
+  CARD
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+
+  username String? @unique
+
+  image    String?
+  accounts Account[]
+  sessions Session[]
+
+  invoices         Invoice[] @relation("creator")
+  receivedInvoices Invoice[] @relation("recipient")
+}
+
+model Invoice {
+  id            String      @id @default(cuid())
+  discount      Int?
+  status        StatusType
+  paymentMethod PaymentType
+
+  issuedAt  DateTime @default(now())
+  soldAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  creator     User   @relation("creator", fields: [creatorId], references: [id])
+  creatorId   String
+  recipient   User   @relation("recipient", fields: [recipientId], references: [id])
+  recipientId String
+}
+
+model Product {
+  id String @id @default(cuid())
+
+  name        String?
+  description String?
+  price       Int?
+  quantity    Int?
+  vat         Int?
+
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId String
+}
