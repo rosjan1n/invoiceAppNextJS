@@ -83,11 +83,11 @@ model Invoice {
 model Product {
   id String @id @default(cuid())
 
-  name        String?
-  description String?
-  price       Int?
-  quantity    Int?
-  vat         Int?
+  name        String
+  description String
+  price       Int
+  quantity    Int
+  vat         Int
 
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   invoiceId String

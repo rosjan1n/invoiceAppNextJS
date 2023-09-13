@@ -1,5 +1,4 @@
-import { User } from "next-auth";
-import { FC } from "react";
+import { User } from "@prisma/client";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import Image from "next/image";
 import { Icons } from "./Icons";
@@ -9,17 +8,17 @@ interface UserAvatarProps extends AvatarProps {
   user: Pick<User, "name" | "image">;
 }
 
-const UserAvatar: FC<UserAvatarProps> = ({ user, ...props }) => {
+export function UserAvatar({ user, ...props }: UserAvatarProps) {
   return (
     <Avatar {...props}>
       {user.image ? (
         <div className="relative aspect-square h-full w-full">
           <Image
             fill
-            src={user?.image}
+            src={user.image}
             alt="Zdjęcie profilowe"
             referrerPolicy="no-referrer"
-          ></Image>
+          />
         </div>
       ) : (
         <AvatarFallback>
@@ -29,6 +28,4 @@ const UserAvatar: FC<UserAvatarProps> = ({ user, ...props }) => {
       )}
     </Avatar>
   );
-};
-
-export default UserAvatar;
+}
